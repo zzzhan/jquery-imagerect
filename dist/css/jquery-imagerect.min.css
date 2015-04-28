@@ -1,0 +1,1 @@
+.imagerect{position:relative;width:100%;min-height:200px;border:1px solid #eee;overflow:hidden}.imagerect .imagerect-selector{position:relative;width:2000px;height:2000px;top:-1000px;left:-1000px;border:1000px solid rgba(0,0,0,.6);overflow:auto;resize:both;cursor:move}

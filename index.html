@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Imagerect - Pick a rectangle part of image</title>
+    <link href="dist/css/jquery-imagerect.css" rel="stylesheet">
+  </head>
+  <body>
+	<div style="width:400px">
+	  <div class="imagerect" data-url="http://global.bing.com/az/hprichbg/rb/KelpGoose_EN-US10550257531_1920x1080.jpg">
+	  </div>
+	</div>
+	<div id="test">
+		<div></div>
+		<div></div>		
+	</div>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="dist/js/jquery-imagerect.js"></script>
+    <script type="text/javascript">
+    $(function(){
+	  var imgp = $('.imagerect');
+	  imgp.imagerect();
+	  imgp.on('pick', function(e) {
+		var pos = e.value;
+		var test = $('#test div');
+		test.last().text('x:'+pos.x+' y:'+pos.y+' w:'+pos.w+' h:'+pos.h);
+	  });
+	  imgp.on('load', function(e) {
+		var pos = e.value;
+		var test = $('#test div');
+		var img = e.relatedTarget;
+		test.first().text(img.width +'X'+img.height);
+		test.last().text('x:'+pos.x+' y:'+pos.y+' w:'+pos.w+' h:'+pos.h);
+	  });
+    });
+    </script>
+  </body>
+</html>
