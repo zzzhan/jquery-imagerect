@@ -1,0 +1,29 @@
+{
+  "name": "jquery-imagerect",
+  "version": "0.1.0",
+  "authors": [
+    "zzzhan <chunzhan.he@gmail.com>"
+  ],
+  "description": "Pick a rectangle part of image",
+  "main": [
+    "src/js/jquery-imagerect.js",
+    "src/css/jquery-imagerect.css"
+  ],
+  "keywords": [
+    "image picker",
+    "image selector",
+    "jquery"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/zzzhan/jquery-imagerect",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "1.11.2"
+  }
+}
