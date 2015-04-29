@@ -20,11 +20,12 @@
         //this.elm.height(this.option.h);
         this.option($.extend({}, defaults, this.elm.data(), option));
 	};
-    ImageRect.version = '0.1.0';
+    ImageRect.version = '0.1.1';
     ImageRect.prototype = {
         constructor: ImageRect,
     	imageload:function(e) {
     		//console.log(this.img.width+'x'+this.img.height);
+			this.elm.text('');
     		this.url(this.opts.url);
             this.opts.w=this.opts.w||this.elm.width();
             this.opts.h=this.opts.h||this.elm.height();
@@ -70,6 +71,7 @@
 				img.src = option.url;
 				$(img).on('load', $.proxy(this.imageload, this));
 				this.img = img;
+				this.elm.text('loading...');
 			  }
 			  this.opts = $.extend(this.opts, option);
             }
@@ -126,17 +128,18 @@
             e.preventDefault();
             if(!this.opts.dblToggle) {
                 this.opts.dblToggle = true;
-                this.lastRect = this.imageRect();
+                this.lastRect = this.rect();
                 this.elm.trigger({
                     type: 'pick',
-                    value: this.imageRect({x:0,y:0,w:this.img.width,h:this.img.height})
+                    value: this.rect({x:0,y:0,w:this.img.width,h:this.img.height})
                 });
             } else {
                 this.opts.dblToggle = false;
                 var l = this.lastRect||this.defRect();
+				console.log(l);
                 this.elm.trigger({
                     type: 'pick',
-                    value: this.imageRect({x:l.x,y:l.y,w:l.w,h:l.h})
+                    value: this.rect({x:l.x,y:l.y,w:l.w,h:l.h})
                 });                
             }
         },
@@ -153,7 +156,7 @@
     	rect: function(rect) {
             var percent = this.percent;
             if(!!rect) {
-                rect = $.extend(this.opts.rect, rect);
+                rect = $.extend({}, this.opts.rect, rect);
                 var sx = rect.x*percent;
                 var sy = rect.y*percent;
                 var sw = rect.w*percent;
