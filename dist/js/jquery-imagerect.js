@@ -23,7 +23,7 @@
     ImageRect.version = '0.1.1';
     ImageRect.prototype = {
         constructor: ImageRect,
-    	imageload:function(e) {
+    	imageload:function() {
     		//console.log(this.img.width+'x'+this.img.height);
 			this.elm.text('');
     		this.url(this.opts.url);
@@ -95,15 +95,14 @@
     		var e = evt.originalEvent;
             var sw = this.selector.width();
             var sh = this.selector.height();
-            if(this.sw!==sw) return;
-            if(this.sh!==sh) return;
+            if(this.sw!==sw||this.sh!==sh) {return;}
             this.offsetMx = (e.clientX - this.elm.offset().left);
             this.offsetMy = (e.clientY - this.elm.offset().top);
     		this.move();
             this.offsetDx=this.offsetMx;
             this.offsetDy=this.offsetMy;
     	},
-    	mouseup:function(evt) {
+    	mouseup:function() {
             this.selector.off('mousemove');
             var p = this.percent;
             var co = this.currOffset();
