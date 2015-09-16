@@ -16,137 +16,133 @@
 }(function($){
 	var defaults = {};
 	var ImageRect = function(elm, option) {
-        this.elm = $(elm);
-        //this.elm.height(this.option.h);
-        this.option($.extend({}, defaults, this.elm.data(), option));
+	  this.element = elm;
+	  var $elem = $(this.element);
+        //$elm.height(this.option.h);
+	  this.opts = $.extend({}, defaults, $elem.data(), option);
+	  if(!!this.opts.url) {
+	    this.load(this.opts.url);
+	  }
+	};
+    var _defRect = function(img) {
+	  return {w:img.width/2,h:img.height/2, x:0,y:0};
 	};
     ImageRect.version = '0.1.1';
     ImageRect.prototype = {
         constructor: ImageRect,
-    	imageload:function() {
+    	_loaded:function(e) {
+	       var $elm = $(this.element);
     		//console.log(this.img.width+'x'+this.img.height);
-			this.elm.text('');
-    		this.url(this.opts.url);
-            this.opts.w=this.opts.w||this.elm.width();
-            this.opts.h=this.opts.h||this.elm.height();
-    		if(this.opts.w<this.img.width) {
+			$elm.text('');
+			var img = e.target;
+			this.opts.url = img.src;
+            $elm.css({'background': 'url('+img.src+') no-repeat'});
+            this.opts.w=this.opts.w||$elm.width();
+            this.opts.h=this.opts.h||$elm.height();
+    		if(this.opts.w<img.width) {
     			//console.log('percent:'+percent);
-				this.elm.css('background-size', '100% auto'); 
+				$elm.css('background-size', '100% auto'); 
 				//hack ie8
-				this.elm.css('filter',"progid:DXImageTransform.Microsoft.AlphaImageLoader(src='"+this.opts.url+"', sizingMethod='scale')\\9");
-            }
-            this.percent = this.opts.w/this.img.width;
-            var rect = this.opts.rect||this.defRect();
-            var dh = this.img.height*this.percent;
-            this.elm.height(Math.max(this.opts.h, dh));     
-            if(this.selector==null) {
-                this.selector = $('<div class="imagerect-selector"></div>').appendTo(this.elm);
-                this.selector.on('dblclick', $.proxy(this.dblclick, this));
-                this.selector.on('mousedown', $.proxy(this.mousedown, this));
-                this.selector.on('mouseup', $.proxy(this.mouseup, this));
-				this.selector.css('resize', this.opts.resize||'both');
+				$elm.css('filter',"progid:DXImageTransform.Microsoft.AlphaImageLoader(src='"+this.opts.url+"', sizingMethod='scale')\\9");
+			}
+				this.percent = this.opts.w/img.width;
+            var rect = this.opts.rect||_defRect(img);
+            var dh = img.height*this.percent;
+            $elm.height(Math.max(this.opts.h, dh));     
+            if($('.imagerect-selector', $elm).length===0) {
+               $('<div class="imagerect-selector"></div>').appendTo($elm).on('dblclick', 
+			     $.proxy(this.dblclick, this)).on('mousedown', $.proxy(this.mousedown, this)).on('mouseup', 
+			     $.proxy(this.mouseup, this)).css('resize', this.opts.resize||'both');
             }
             this.rect(rect);       
-            this.elm.trigger({
-                type: 'load',
-                value: this.rect(),
-                relatedTarget:this.img
-            });
+            $elm.trigger('loaded',[this.rect(),img]);
+			this.img = img;
     	},
-        defRect:function() {
-            return {w:this.img.width/2,h:this.img.height/2,
-                    x:this.img.width/4,y:this.img.height/4};
-        },
-        url:function(url) {
-          if(!!url) {            
-            this.elm.css({'background': 'url('+url+') no-repeat'});
-          }
-          return this.opts.url;
-        },
-        option:function(option) {
-            if(!!option) {
-			  if(!!option.url) {
-				var img = new Image();
-				//img.crossOrigin = "Anonymous";
-				img.src = option.url;
-				$(img).on('load', $.proxy(this.imageload, this));
-				this.img = img;
-				this.elm.text('loading...');
-			  }
-			  this.opts = $.extend(this.opts, option);
-            }
-            return this.opts;
-        },
+		load: function(url, rect) {
+	      var $elm = $(this.element);		  
+		  $('.imagerect-selector', $elm).remove();
+		  this.opts.rect = rect;
+		  var img = new Image();
+		  //img.crossOrigin = "Anonymous";
+		  img.src = url;
+		  $(img).on('load', $.proxy(this._loaded, this)).on('error', function() {
+		    $elm.text('Load image error.');		    
+		  });
+		  $elm.text('Loading...');		  
+		},
     	mousedown:function(evt) {
+	      var $elm = $(this.element);		 
+		  var selector = $('.imagerect-selector', $elm);
             evt.stopPropagation();
             //evt.preventDefault();
             var e = evt.originalEvent;
-            var sw = this.selector.width();
-            var sh = this.selector.height();
+            var sw = selector.width();
+            var sh = selector.height();
             this.sw = sw;
             this.sh = sh;
-            this.offsetDx = (e.clientX - this.elm.offset().left);
-            this.offsetDy = (e.clientY - this.elm.offset().top);
-            this.selector.on('mousemove', $.proxy(this.mousemove, this));
+            this.offsetDx = (e.clientX - $elm.offset().left);
+            this.offsetDy = (e.clientY - $elm.offset().top);
+            selector.on('mousemove', $.proxy(this.mousemove, this));
     	},
     	mousemove:function(evt) {
+	      var $elm = $(this.element);
+		  var selector = $('.imagerect-selector', $elm);
             evt.stopPropagation();
             //evt.preventDefault();
     		var e = evt.originalEvent;
-            var sw = this.selector.width();
-            var sh = this.selector.height();
+            var sw = selector.width();
+            var sh = selector.height();
             if(this.sw!==sw||this.sh!==sh) {return;}
-            this.offsetMx = (e.clientX - this.elm.offset().left);
-            this.offsetMy = (e.clientY - this.elm.offset().top);
+            this.offsetMx = (e.clientX - $elm.offset().left);
+            this.offsetMy = (e.clientY - $elm.offset().top);
     		this.move();
             this.offsetDx=this.offsetMx;
             this.offsetDy=this.offsetMy;
     	},
     	mouseup:function() {
-            this.selector.off('mousemove');
+	      var $elm = $(this.element);
+		  var selector = $('.imagerect-selector', $elm);
+            selector.off('mousemove');
             var p = this.percent;
             var co = this.currOffset();
-            var pw = this.selector.innerWidth();
-            var ph = this.selector.innerHeight();
+            var pw = selector.innerWidth();
+            var ph = selector.innerHeight();
             $.extend(this.opts.rect, {x:co.left/p,y:co.top/p,w:pw/p,h:ph/p});
-            this.elm.trigger({
-                type: 'pick',
-                value: this.rect()
-            });
+            $elm.trigger('rect',[this.rect()]);
     	},
     	move:function() {
+	      var $elm = $(this.element);
+		  var selector = $('.imagerect-selector', $elm);
     		var dx = (this.offsetMx-this.offsetDx);
     		var dy = (this.offsetMy-this.offsetDy);
-    		var offset = this.selector.offset();
+    		var offset = selector.offset();
     		var sx = offset.left;
     		var sy = offset.top;
-    		this.selector.offset({top:sy+dy, left:sx+dx});
+    		selector.offset({top:sy+dy, left:sx+dx});
     	},
         dblclick:function(e) {
+	      var $elm = $(this.element);
+		  var img = this.img;
             e.stopPropagation();
             e.preventDefault();
             if(!this.opts.dblToggle) {
                 this.opts.dblToggle = true;
                 this.lastRect = this.rect();
-                this.elm.trigger({
-                    type: 'pick',
-                    value: this.rect({x:0,y:0,w:this.img.width,h:this.img.height})
-                });
+                $elm.trigger('rect',[this.rect({x:0,y:0,w:img.width,h:img.height})]);
             } else {
                 this.opts.dblToggle = false;
-                var l = this.lastRect||this.defRect();
+                var l = this.lastRect||_defRect(img);
 				console.log(l);
-                this.elm.trigger({
-                    type: 'pick',
-                    value: this.rect({x:l.x,y:l.y,w:l.w,h:l.h})
-                });                
+                $elm.trigger('rect',[this.rect({x:l.x,y:l.y,w:l.w,h:l.h})]);
             }
         },
         currOffset:function() {
-            var offset = this.selector.offset();
-            var offset1 = this.elm.offset();
-            var bw = (this.selector.outerWidth(true)-this.selector.innerWidth())/2;
-            var bh = (this.selector.outerHeight(true)-this.selector.innerHeight())/2;
+	      var $elm = $(this.element);
+		  var selector = $('.imagerect-selector', $elm);
+            var offset = selector.offset();
+            var offset1 = $elm.offset();
+            var bw = (selector.outerWidth(true)-selector.innerWidth())/2;
+            var bh = (selector.outerHeight(true)-selector.innerHeight())/2;
             //console.log(bw+'x'+bh);
             var px = offset.left-offset1.left+bw;
             var py = offset.top-offset1.top+bh;
@@ -155,6 +151,8 @@
     	rect: function(rect) {
             var percent = this.percent;
             if(!!rect) {
+	        var $elm = $(this.element);
+		    var selector = $('.imagerect-selector', $elm);
                 rect = $.extend({}, this.opts.rect, rect);
                 var sx = rect.x*percent;
                 var sy = rect.y*percent;
@@ -166,8 +164,8 @@
                 this.offsetDx = co.left;
                 this.offsetDy = co.top;
                 this.move();
-                this.selector.width(sw);
-                this.selector.height(sh);
+                selector.width(sw);
+                selector.height(sh);
                 this.opts.rect = rect;
             }
             return this.opts.rect;
